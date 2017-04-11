@@ -22,7 +22,7 @@
 
 ---
 
-##### Оглавление
+## Оглавление
 
 * [Правила](#Правила) 
 * [Middleware(Interceptors)](#middlewareinterceptors)
@@ -168,7 +168,7 @@ func (c EventsController) Index() revel.Result {
     }
 ...
 }
- 
+``` 
  
  ###### EventsController.go - EventValidator()
 ```go
