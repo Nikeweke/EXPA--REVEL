@@ -4,7 +4,6 @@ chcp 866>nul
 
 :: start
 REM ПРИМЕР ИСПОЛЬЗОВАНИЯ
-REM SET GOPATH=D:\MORION\RETHINKDB\GO
 
 
 SET GOPATH=%CD%
