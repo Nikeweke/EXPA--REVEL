@@ -1,30 +1,22 @@
 ## Revel - framework for Go
+###### [Revel - official site](https://revel.github.io/manual/database.html)
 
 #### Запуск приложения после скачки с репо
 1. git clone https/ project
-2. запустить Install_pkg.bat - установит и обновит нужные пакеты в src
+2. запустить **Install_pkg.bat** - установит и обновит нужные пакеты в src
 2. из папки **bin** взять **revel.exe** и скопировать в **System32** для глобальной видимости`(или как то подругому сделать его видимым глобально, нужно для сборки и запуска проекта)`
 3. запустить RUN.bat - запуск и построения проекта
 
 
 #### Запуск приложения на сервере
-* При компиле файл надо добавить после GOROOT and SET PATH в RUN.bat
-##### RUN.bat
-```
-SET GOOS=linux
-SET GOARCH=amd64
-SET CGO_ENABLED=0
-
-REM создание компила в папку "bars" в режиме "prod"
-revel build bars bars prod
-```
-
-Переписать файлик который сгенерировал Revel, не работает, по-этому для запуска вот эта строчка
+* Скопировать построенный проект на сервер
+* Запустить : `run.sh` - чере комманду: `bash run.sh`
+* **Ошибка** может возникнуть тогда просто ввести вот это:
 ```
 ./bars -importPath bars -srcPath ./src -runMode prod
 ```
 
-#### Golang frameworks:
+###### Golang frameworks:
 * **Beego** - https://medium.com/@richardeng/a-word-from-the-beegoist-d562ff8589d7#.x374zbcum
 * **Revel** - https://revel.github.io/manual/database.html
 
@@ -164,7 +156,21 @@ PUT      /events/change     SomeController.Change
 
 
 ### Валидация
- Чтобы выводило все ошибки после всей проверки надо изменить **src/github.com/revel/revel/validation.go:196** строка в функции `ValidationFilter(c *Controller, fc []Filter())` изменить `c.RenderArgs["errors"] = c.Validation.ErrorMap()` на `c.RenderArgs["errors"] = c.Validation.Errors` 
+ Чтобы выводило все ошибки после всей проверки надо изменить **src/github.com/revel/revel/validation.go:196** строка в функции `ValidationFilter(c *Controller, fc []Filter())` изменить `c.ViewArgs["errors"] = c.Validation.ErrorMap()` на `c.RenderArgs["errors"] = c.Validation.Errors` 
+ 
+###### EventsController.go - Index()
+ ```go
+func (c EventsController) Index() revel.Result {
+...
+  // Проверка данных
+    if c.EventValidator(title, email) {
+       return c.Redirect("/events/")
+    }
+...
+}
+ 
+ 
+ ###### EventsController.go - EventValidator()
 ```go
 func (c EventsController) EventValidator(title, email string) bool {
 
