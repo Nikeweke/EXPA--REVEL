@@ -1,6 +1,10 @@
 ## Revel - framework for Go
 ###### [Revel - official site](https://revel.github.io/manual/database.html)
 
+
+### Запуск Run.bat не делать через консоль ATom'a, а кликом на файле
+
+
 #### Запуск приложения после скачки с репо
 1. git clone https/ project
 2. запустить **Install_pkg.bat** - установит и обновит нужные пакеты в src
