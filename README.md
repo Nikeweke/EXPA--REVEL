@@ -1,6 +1,18 @@
 ## Revel - framework for Go
 ###### [Revel - official site](https://revel.github.io/manual/database.html)
 
+## Содержание
+* [Запуск](#Запуск) 
+* [Правила](#Правила) 
+* [Middleware(Interceptors)](#middlewareinterceptors)
+* [Контроллеры](#Контроллеры)
+* [Модели](#Модели)
+* [Маршрутизация](#Маршрутизация)
+* [Валидация](#Валидация)
+* [Локализация](#Локализация) 
+* [Проблемы - Решения](#Проблемы - Решения) 
+
+---
 
 ### Запуск Run.bat не делать через консоль ATom'a, а кликом на файле
 
@@ -19,23 +31,6 @@
 ```
 ./bars -importPath bars -srcPath ./src -runMode prod
 ```
-
-###### Golang frameworks:
-* **Beego** - https://medium.com/@richardeng/a-word-from-the-beegoist-d562ff8589d7#.x374zbcum
-* **Revel** - https://revel.github.io/manual/database.html
-
----
-
-## Оглавление
-
-* [Правила](#Правила) 
-* [Middleware(Interceptors)](#middlewareinterceptors)
-* [Контроллеры](#Контроллеры)
-* [Модели](#Модели)
-* [Маршрутизация](#Маршрутизация)
-* [Валидация](#Валидация)
-* [Локализация](#Локализация) 
-
 
 
 ### Правила
@@ -205,5 +200,14 @@ func (c EventsController) EventValidator(title, email string) bool {
     5. На шаблоне юзать так - `{{msg . "greeting"}}`, в контроллере так - `c.Message("greeting")`
 
 
+### Проблемы - Решения
+* Revel - вывод ошибок: в стандартной сборке после валидации данных Revel отдает только 1 строку ошибки валидации, а точнее первое сообщение. **Решение** - в файле **src/github.com/revel/revel/validation.go** в функции ValidationFilter(c *Controller, fc []Filter()) изменить c.RenderArgs["errors"] = c.Validation.ErrorMap() на c.RenderArgs["errors"] = c.Validation.Errors
+
+* Если при запуске пишет: `no mode found`.  **src/github.com/revel/revel/revel.go** - надо закоментить следуещие:
+```
+if !Config.HasSection(mode) {
+	// 	log.Fatalln("app.conf: No mode found:", mode)
+	// }
+```
 
 
