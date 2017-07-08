@@ -14,9 +14,6 @@
 
 ---
 
-### Запуск Run.bat не делать через консоль ATom'a, а кликом на файле
-
-
 #### Запуск приложения после скачки с репо
 1. git clone https/ project
 2. запустить **Install_pkg.bat** - установит и обновит нужные пакеты в src
@@ -31,9 +28,24 @@
 ```
 ./bars -importPath bars -srcPath ./src -runMode prod
 ```
+* **Если ошибка** `no mode found: dev, prod`, решение: изменить в github.com/revel/revel/revel.go
+```go
+ if !Config.HasSection(mode) {
+    log.Fatalln("app.conf: No mode found:", mode)
+ }
+Config.SetSection(mode)
+```
+НА
+```go
+//if !Config.HasSection(mode) {
+ //   log.Fatalln("app.conf: No mode found:", mode)
+// }
+Config.SetSection("dev") // or prod
+```
 
 
 ### Правила
+* Запуск Run.bat не делать через консоль ATom'a, а кликом на файле
 * в папке **src** должна быть папка **bars** - это текущий проект
 * в .gitignore должны быть (короче vendors):
 ```
