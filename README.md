@@ -1,53 +1,41 @@
-## Revel - framework for Go
-###### [Revel - official site](https://revel.github.io/manual/database.html)
+## [Revel - framework for Go](https://revel.github.io)
 
-## Содержание
+
+### Содержание
 * [Запуск](#Запуск) 
 * [Правила](#Правила) 
+* [Run.bat](#run.bat)
 * [Middleware(Interceptors)](#middlewareinterceptors)
 * [Контроллеры](#Контроллеры)
 * [Модели](#Модели)
 * [Маршрутизация](#Маршрутизация)
 * [Валидация](#Валидация)
 * [Локализация](#Локализация) 
-* [Проблемы - Решения](#Проблемы - Решения) 
+* [Jobs](#jobs)
+* [Проблемы - Решения](#Проблемы-Решения) 
 
 ---
 
-#### Запуск приложения после скачки с репо
+### Запуск 
+**Приложения после скачки с репо**
 1. git clone https/ project
 2. запустить **Install_pkg.bat** - установит и обновит нужные пакеты в src
-2. из папки **bin** взять **revel.exe** и скопировать в **System32** для глобальной видимости`(или как то подругому сделать его видимым глобально, нужно для сборки и запуска проекта)`
-3. запустить RUN.bat - запуск и построения проекта
+3. запустить RUN.bat - где написано `revel run app`
 
 
-#### Запуск приложения на сервере
-* Скопировать построенный проект на сервер
-* Запустить : `run.sh` - чере комманду: `bash run.sh`
-* **Ошибка** может возникнуть тогда просто ввести вот это:
+**Приложения на сервере**
+1. Скопировать построенный проект на сервер
+2. Запустить : `run.sh` - чере комманду: `bash run.sh`, если не работает читай пункт 3
+3. **Ошибка** может возникнуть тогда просто ввести вот это:
 ```
 ./bars -importPath bars -srcPath ./src -runMode prod
 ```
-* **Если ошибка** `no mode found: dev, prod`, решение: изменить в github.com/revel/revel/revel.go
-```go
- if !Config.HasSection(mode) {
-    log.Fatalln("app.conf: No mode found:", mode)
- }
-Config.SetSection(mode)
-```
-НА
-```go
-//if !Config.HasSection(mode) {
- //   log.Fatalln("app.conf: No mode found:", mode)
-// }
-Config.SetSection("dev") // or prod
-```
+
 
 
 ### Правила
-* Запуск Run.bat не делать через консоль ATom'a, а кликом на файле
 * в папке **src** должна быть папка **bars** - это текущий проект
-* в .gitignore должны быть (короче vendors):
+* в .gitignore должны быть (vendors):
 ```
 puller.bat
 pusher.bat
@@ -55,6 +43,30 @@ pusher.bat
 /src/golang.org
 /src/gopkg.in
 ```
+
+### Run.bat
+```go
+@ECHO OFF
+
+REM SET GOROOT=C:\GO
+SET GOPATH=%CD%
+SET PATH=%GOPATH%\BIN;%PATH%;
+
+rem SET GOOS=linux
+rem SET GOARCH=amd64
+rem SET CGO_ENABLED=0
+
+REM packages
+rem go get github.com/revel/revel
+rem go get github.com/revel/cmd/revel
+
+revel run project
+pause
+
+```
+
+
+---
 
 
 ### Middleware(Interceptors)
@@ -204,7 +216,7 @@ func (c EventsController) EventValidator(title, email string) bool {
 ```
 
 ### Локализация
-###### *Установка локализации идет в 3 шага (проверки):*
+*Установка локализации идет в 3 шага (проверки):*
   1. Revel ищет куки с префиксом `REVEL` по-ум. и постфиксом `_LANG` , префикс устанавливаеться в файл conf/app.conf -> `cookie.prefix = REVEL`, и выходит что оно ищет куку с названием - **REVEL_LANG**, которая содержит название текущего языка - `'ru', 'en', 'fr'` и так далее.
     2. Если куки `REVEL_LANG` - не существует, начнеться проверка **Accept-Language HTTP header**, другими словами проверка башки запроса  которая приходит от клиента
     3. Если не удаеться определить язык и по **2 пункту**, тогда устанавливаеться язык по-ум. который лежит в conf/app.conf -> `i18n.default_language = en`
@@ -212,10 +224,43 @@ func (c EventsController) EventValidator(title, email string) bool {
     5. На шаблоне юзать так - `{{msg . "greeting"}}`, в контроллере так - `c.Message("greeting")`
 
 
-### Проблемы - Решения
-* Revel - вывод ошибок: в стандартной сборке после валидации данных Revel отдает только 1 строку ошибки валидации, а точнее первое сообщение. **Решение** - в файле **src/github.com/revel/revel/validation.go** в функции ValidationFilter(c *Controller, fc []Filter()) изменить c.RenderArgs["errors"] = c.Validation.ErrorMap() на c.RenderArgs["errors"] = c.Validation.Errors
+### Jobs
+1. Создать в контроллерах(папке) - **ex_job.go**:
+```go
+package controllers
 
-* Если при запуске пишет: `no mode found`.  **src/github.com/revel/revel/revel.go** - надо закоментить следуещие:
+import (
+    "time"
+    "fmt"
+
+    "github.com/revel/revel"
+    "github.com/revel/modules/jobs/app/jobs"
+)
+
+type ReminderEmails struct {
+    // Filtered
+}
+
+func (e ReminderEmails) Run() {
+     fmt.Println("hello")
+}
+
+func init() {
+    revel.OnAppStart(func() {
+        // jobs.Schedule("0 0 0 * * ?",  ReminderEmails{})
+        // jobs.Schedule("@midnight",    ReminderEmails{})
+        // jobs.Schedule("@every 24h",   ReminderEmails{})
+        jobs.Every(1 * time.Second,    ReminderEmails{})  // каждую секунду пишет "hello"
+    })
+}
+
+```
+
+
+### Проблемы - Решения
+1. **Revel - вывод ошибок**: в стандартной сборке после валидации данных Revel отдает только 1 строку ошибки валидации, а точнее первое сообщение. **Решение** - в файле **src/github.com/revel/revel/validation.go** в функции `ValidationFilter(c *Controller, fc []Filter())` изменить `c.RenderArgs["errors"] = c.Validation.ErrorMap(`) на `c.RenderArgs["errors"] = c.Validation.Errors`
+
+2. **Если при запуске** пишет: `no mode found`.  **src/github.com/revel/revel/revel.go** - надо закоментить следуещие:
 ```
 if !Config.HasSection(mode) {
 	// 	log.Fatalln("app.conf: No mode found:", mode)
